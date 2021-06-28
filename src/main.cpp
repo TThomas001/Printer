@@ -1,16 +1,16 @@
+
 #include <Arduino.h>
 #include<SPI.h>
 #include <ThingerESP32.h>
 #include <FanController.h>
 
-
 /*thinger.io setting*/
-#define DEBUG
 #define USERNAME "Thomas_tt"
-#define DEVICE_ID "ESP32"
-#define DEVICE_CREDENTIAL "fa25y0%m@yzT1u78"
-#define SSID "MyAltice e37ddd"
-#define SSID_PASSWORD "52-emerald-4063"
+#define DEVICE_ID "Fan"
+#define DEVICE_CREDENTIAL "C%GRMLy7R2!-!zw7"
+#define SSID "LAPTOP-IUIICA2V 4647"
+#define SSID_PASSWORD "G/7g5806"
+
 
 /*DHT sensor setting*/
 #include "DHT.h"
@@ -27,7 +27,7 @@
 ThingerESP32 thing(USERNAME, DEVICE_ID, DEVICE_CREDENTIAL);
 DHT dht(DHTPIN, DHTTYPE);
 FanController fan(SENSOR_PIN, SENSOR_THRESHOLD, PWM_PIN);
-
+#define DEBUG
 void setup() {
   Serial.begin(115200);
   dht.begin();
