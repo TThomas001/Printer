@@ -10,7 +10,9 @@
 #define DEVICE_CREDENTIAL "C%GRMLy7R2!-!zw7"
 #define SSID "LAPTOP-IUIICA2V 4647"
 #define SSID_PASSWORD "G/7g5806"
+#define _DEBUG_
 
+// the rest of your sketch goes here
 
 /*DHT sensor setting*/
 #include "DHT.h"
@@ -18,11 +20,12 @@
 #define DHTPIN 4   
 
 /*Fan control setting*/
-#define SENSOR_PIN 12
-#define SENSOR_THRESHOLD 1000 //the threshold will defind as time interval.(Large scale led to better accuracy)
+#define SENSOR_PIN 2
+#define SENSOR_THRESHOLD 2000 //the threshold will defind as time interval.(Large scale led to better accuracy)
 #define PWM_PIN 5
 #define min(a,b) ((a)<(b)?(a):(b))
 #define max(a,b) ((a)>(b)?(a):(b))
+int Duty_cycle = 0;
 
 ThingerESP32 thing(USERNAME, DEVICE_ID, DEVICE_CREDENTIAL);
 DHT dht(DHTPIN, DHTTYPE);
@@ -35,10 +38,18 @@ void setup() {
  // Initialization of the WiFi connection with THINGER.IO
   thing.add_wifi(SSID, SSID_PASSWORD);
 
- thing["Fan"] << [](pson& in){
-   int Duty_cycle = in["Speed"];
+ thing["Fan"] = [](pson& in, pson& out){
+  if(in["speed"].is_empty()){
+        in["speed"] = Duty_cycle;
+    }
+    else{
+        Duty_cycle = in["speed"];
+    }
+
    byte target = max(min(Duty_cycle, 100), 0);
    fan.setDutyCycle(target);
+   out["RPM"]=fan.getSpeed();
+   Serial.print(fan.getSpeed());
    };
 
    /* if(in.is_empty()){
