@@ -1,0 +1,18 @@
+{
+	"folders": [
+		{
+			"name": "Printer_Sensor",
+			"path": ".."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"functional": "cpp",
+			"*.tcc": "cpp",
+			"algorithm": "cpp",
+			"random": "cpp",
+			"istream": "cpp",
+			"limits": "cpp"
+		}
+	}
+}

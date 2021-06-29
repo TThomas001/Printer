@@ -1,4 +1,3 @@
-
 #include <Arduino.h>
 #include<SPI.h>
 #include <ThingerESP32.h>
@@ -6,10 +5,13 @@
 
 /*thinger.io setting*/
 #define USERNAME "Thomas_tt"
-#define DEVICE_ID "Fan"
-#define DEVICE_CREDENTIAL "C%GRMLy7R2!-!zw7"
+#define DEVICE_ID "ESP32"
+#define DEVICE_CREDENTIAL "fa25y0%m@yzT1u78"
+#define SSID "MyAltice e37ddd"
+#define SSID_PASSWORD "52-emerald-4063"
+/*#define DEVICE_CREDENTIAL "C%GRMLy7R2!-!zw7"
 #define SSID "LAPTOP-IUIICA2V 4647"
-#define SSID_PASSWORD "G/7g5806"
+#define SSID_PASSWORD "G/7g5806"*/
 #define _DEBUG_
 
 // the rest of your sketch goes here
@@ -20,24 +22,36 @@
 #define DHTPIN 4   
 
 /*Fan control setting*/
-#define SENSOR_PIN 2
+#define SENSOR_PIN 16
 #define SENSOR_THRESHOLD 2000 //the threshold will defind as time interval.(Large scale led to better accuracy)
 #define PWM_PIN 5
 #define min(a,b) ((a)<(b)?(a):(b))
 #define max(a,b) ((a)>(b)?(a):(b))
 int Duty_cycle = 0;
+/*ADXL335 acceleromenter*/
+const int xInput = 32;
+const int yInput = 33;
+const int zInput = 27;
+const int sampleSize = 10;
+int RawMin = 0;
+int RawMax = 1023;
 
 ThingerESP32 thing(USERNAME, DEVICE_ID, DEVICE_CREDENTIAL);
 DHT dht(DHTPIN, DHTTYPE);
 FanController fan(SENSOR_PIN, SENSOR_THRESHOLD, PWM_PIN);
 #define DEBUG
+
+
 void setup() {
   Serial.begin(115200);
   dht.begin();
   fan.begin();
+
  // Initialization of the WiFi connection with THINGER.IO
   thing.add_wifi(SSID, SSID_PASSWORD);
 
+
+/*Fan control API */
  thing["Fan"] = [](pson& in, pson& out){
   if(in["speed"].is_empty()){
         in["speed"] = Duty_cycle;
@@ -45,20 +59,15 @@ void setup() {
     else{
         Duty_cycle = in["speed"];
     }
+  pinMode(SENSOR_PIN, INPUT_PULLUP);
 
    byte target = max(min(Duty_cycle, 100), 0);
    fan.setDutyCycle(target);
    out["RPM"]=fan.getSpeed();
    Serial.print(fan.getSpeed());
    };
+/*DHT API */
 
-   /* if(in.is_empty()){
-      in = (bool) digitalRead(led);
-      }
-    else{
-      digitalWrite(led, in ? HIGH : LOW);
-      }
-    };*/
    thing["DHT21"] >> [](pson& out){
       out["celsius"] = float(dht.readTemperature());
       out["humidity"] = float(dht.readHumidity());
@@ -68,3 +77,17 @@ void setup() {
 void loop() {
   thing.handle();
   }
+
+float Readangle(int axis) //convert the ADXL335 analogy signal to to angle
+{
+	long reading = 0;
+	analogRead(axis);
+	delay(1);
+	for (int i = 0; i < sampleSize; i++)// Take samples and return the average
+	{
+	reading += analogRead(axis);
+	}
+	 int raw= reading/sampleSize;
+  return map(raw, RawMin, RawMax, -3000, 3000)/1000;
+}
+
