@@ -22,9 +22,10 @@
 #define DHTPIN 4   
 
 /*Fan control setting*/
-#define SENSOR_PIN 16
-#define SENSOR_THRESHOLD 2000 //the threshold will defind as time interval.(Large scale led to better accuracy)
+#define SENSOR_PIN 26
+#define SENSOR_THRESHOLD 1000 //the threshold will defind as time interval.(Large scale led to better accuracy)
 #define PWM_PIN 5
+
 #define min(a,b) ((a)<(b)?(a):(b))
 #define max(a,b) ((a)>(b)?(a):(b))
 int Duty_cycle = 0;
@@ -32,14 +33,13 @@ int Duty_cycle = 0;
 const int xInput = 32;
 const int yInput = 33;
 const int zInput = 27;
-const int sampleSize = 10;
+const int sampleSize = 1000;
 int RawMin = 0;
 int RawMax = 1023;
 
 ThingerESP32 thing(USERNAME, DEVICE_ID, DEVICE_CREDENTIAL);
 DHT dht(DHTPIN, DHTTYPE);
 FanController fan(SENSOR_PIN, SENSOR_THRESHOLD, PWM_PIN);
-#define DEBUG
 
 
 void setup() {
@@ -59,13 +59,12 @@ void setup() {
     else{
         Duty_cycle = in["speed"];
     }
-  pinMode(SENSOR_PIN, INPUT_PULLUP);
+  pinMode(SENSOR_PIN, INPUT_PULLUP);// set the resister becuase the fan voltage reference outside source.
 
    byte target = max(min(Duty_cycle, 100), 0);
    fan.setDutyCycle(target);
    out["RPM"]=fan.getSpeed();
-   Serial.print(fan.getSpeed());
-   };
+ };
 /*DHT API */
 
    thing["DHT21"] >> [](pson& out){
